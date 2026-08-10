@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata in this file."
+title: "SciAgent Chemistry Skills"
+type: software
+authors:
+  - alias: "yutong"
+    website: "https://github.com/3494036618-eng"
+repository-code: "https://github.com/3494036618-eng/sciagent-chemistry-skills"
+license: Apache-2.0
+version: "0.1.0-alpha.1"
+date-released: "2026-08-11"
+keywords:
+  - chemistry
+  - scientific-agents
+  - cheminformatics
+  - reaction-informatics
