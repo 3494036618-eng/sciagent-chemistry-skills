@@ -42,22 +42,6 @@ wheels = [
 ]
 
 [[package]]
-name = "gemmi"
-version = "0.6.7"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/5b/5b/63120671875be08b4f3a9c533169725158bcec8e12f961b07e838d6363b0/gemmi-0.6.7.tar.gz", hash = "sha256:5c0809329ba8a9711fdb1655d13c14e226828933e33e8816091a09d3f0ce35ce", size = 1303673, upload-time = "2024-09-06T17:50:30.435Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/70/76/745264424c3fa14774a84a560ead5ad5b6ac12940f15c11e674308838389/gemmi-0.6.7-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:c50d79f2da8892134be7eff3db7e853b0e70766e865cedf914c93c02e31625ec", size = 3157508, upload-time = "2024-09-06T18:02:30.726Z" },
-    { url = "https://files.pythonhosted.org/packages/ab/15/6da742e2cf3e328c0ac3e2348afc6ec79fa1232be98647ffa78232ab9e08/gemmi-0.6.7-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:ed0fc8616bdab24f99b2f91169bd1b8ca16654bad04df3078f880254c10e2152", size = 3005432, upload-time = "2024-09-06T18:02:34.656Z" },
-    { url = "https://files.pythonhosted.org/packages/e9/ef/8af3bcee2c1e73b43fe60309432267dab06bc3c2e76c714a333fdc681c17/gemmi-0.6.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fa50132842bc0c5352d02b2b25d60ce2dfc8f823ad7ca8e3a2e4f253f2919628", size = 3192005, upload-time = "2024-09-06T18:02:38.785Z" },
-    { url = "https://files.pythonhosted.org/packages/b1/56/3567741d9c83d1789fef492162cd26e948c80279e45e393ca686106367a0/gemmi-0.6.7-cp311-cp311-win_amd64.whl", hash = "sha256:b6648953c3f4509f218426bcb3b38de2d821220dad0b8e7bd137c5c201e18aac", size = 2308987, upload-time = "2024-09-06T18:02:41.938Z" },
-    { url = "https://files.pythonhosted.org/packages/06/ca/f00510bca7438058fed548137e2fdafc617fd7dc6fca980f0a9620bc2520/gemmi-0.6.7-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:6212ef3e4b52ae759aac889c5a762e4f9e251eb9df9154c7e0f98dbf5bd61fa7", size = 3258964, upload-time = "2024-09-06T18:02:46.155Z" },
-    { url = "https://files.pythonhosted.org/packages/ab/a3/80bb4e3febb3ac1be8b279c99dfa7519844aa5c8331ba2a4c27c538a3542/gemmi-0.6.7-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:982dd0877100e0ab740b26f6e29f95ed3902c4b4eeb2aee77e2d1394d8feab34", size = 3024878, upload-time = "2024-09-06T18:02:50.217Z" },
-    { url = "https://files.pythonhosted.org/packages/de/c3/11a2e35a0b808dce7e4cd9784d6292598c8527f90edf73a38a15c08cc8d3/gemmi-0.6.7-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:80db673d3b9104f2044c2a226dcd3d746f69cb69649fcc67f22bb989c2f3c138", size = 3200143, upload-time = "2024-09-06T18:02:53.631Z" },
-    { url = "https://files.pythonhosted.org/packages/12/64/677f2a2f5ecfb035d3ad91b5d6dbf554e4ee57b545ae7167138cd78b0085/gemmi-0.6.7-cp312-cp312-win_amd64.whl", hash = "sha256:8224c62fb4b85cfc7e3dd3760c688bd8d860412b499e7cedb71a1280ed1a0634", size = 2321327, upload-time = "2024-09-06T18:02:56.813Z" },
-]
-
-[[package]]
 name = "iniconfig"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -408,7 +392,6 @@ source = { virtual = "." }
 [package.dev-dependencies]
 dev = [
     { name = "chembl-structure-pipeline" },
-    { name = "gemmi" },
     { name = "ord-schema" },
     { name = "pytest" },
     { name = "pyyaml" },
@@ -421,7 +404,6 @@ dev = [
 [package.metadata.requires-dev]
 dev = [
     { name = "chembl-structure-pipeline", specifier = "==1.2.4" },
-    { name = "gemmi", specifier = "==0.6.7" },
     { name = "ord-schema", specifier = "==0.8.3" },
     { name = "pytest", specifier = "==9.0.3" },
     { name = "pyyaml", specifier = "==6.0.2" },

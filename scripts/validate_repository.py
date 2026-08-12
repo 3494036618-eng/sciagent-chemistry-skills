@@ -21,7 +21,6 @@ SKILLS = (
     "curate-reactions",
     "search-reactions",
     "review-routes",
-    "predict-complex-structures",
 )
 
 ROOT_FILES = (

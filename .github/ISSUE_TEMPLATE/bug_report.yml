@@ -19,7 +19,6 @@ body:
         - curate-reactions
         - search-reactions
         - review-routes
-        - predict-complex-structures
         - repository or CI
     validations:
       required: true

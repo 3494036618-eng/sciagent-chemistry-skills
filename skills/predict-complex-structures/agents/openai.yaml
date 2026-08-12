@@ -1,4 +1,0 @@
-interface:
-  display_name: "生物分子复合物结构预测"
-  short_description: "结合科研证据、配体结构审查和 Protenix，生成可追溯结构预测与专家复核包"
-  default_prompt: "使用 $predict-complex-structures 审查蛋白质与配体输入，准备官方兼容的 Protenix 任务；仅在合规 GPU Runtime 可用时执行预测，并校验结构、置信度、来源和科学边界。"
