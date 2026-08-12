@@ -244,7 +244,7 @@ def read_input_records(
     else:
         resolved_path = path.resolve()
         text = resolved_path.read_text(encoding="utf-8")
-        source = str(resolved_path)
+        source = path.name
 
     actual_format = (
         detect_file_format(resolved_path, text)

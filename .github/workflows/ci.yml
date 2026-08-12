@@ -32,14 +32,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements-dev.txt
-          python -m pip check
+          python -m pip install uv==0.11.11
+          uv sync --frozen --all-groups
+          uv pip check
 
       - name: Validate repository contract
-        run: python scripts/validate_repository.py
+        run: uv run --frozen python scripts/validate_repository.py
 
       - name: Run static checks
-        run: python -m ruff check skills tests scripts
+        run: uv run --frozen ruff check skills tests scripts examples
 
       - name: Run public test suite
-        run: python -m pytest -q
+        run: uv run --frozen python -m pytest -q

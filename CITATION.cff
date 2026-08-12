@@ -7,8 +7,8 @@ authors:
     website: "https://github.com/3494036618-eng"
 repository-code: "https://github.com/3494036618-eng/sciagent-chemistry-skills"
 license: Apache-2.0
-version: "0.1.0-alpha.1"
-date-released: "2026-08-11"
+version: "0.1.0-alpha.2"
+date-released: "2026-08-12"
 keywords:
   - chemistry
   - scientific-agents

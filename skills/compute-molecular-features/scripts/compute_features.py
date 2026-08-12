@@ -482,7 +482,7 @@ def load_input_records(
     actual_format = (
         detect_input_format(path, text) if input_format == "auto" else input_format
     )
-    source = str(path.resolve())
+    source = path.name
 
     if actual_format == "json":
         try:
@@ -1167,11 +1167,11 @@ def build_dataset_profile(
     }
     status_counts = {
         status: sum(record["calculation_status"] == status for record in records)
-        for status in CALCULATION_STATUSES
+        for status in sorted(CALCULATION_STATUSES)
     }
     disposition_counts = {
         status: sum(record["disposition"] == status for record in records)
-        for status in DISPOSITIONS
+        for status in sorted(DISPOSITIONS)
     }
     upstream_groups = upstream.get("duplicate_groups")
     upstream_group_list = (
@@ -1234,7 +1234,7 @@ def summarize_input(
 ) -> dict[str, Any]:
     upstream_counts = {
         status: sum(record["disposition"] == status for record in records)
-        for status in UPSTREAM_DISPOSITIONS
+        for status in sorted(UPSTREAM_DISPOSITIONS)
     }
     upstream_counts["not_provided_or_unknown"] = len(records) - sum(
         upstream_counts.values()
@@ -1246,11 +1246,11 @@ def summarize_input(
             status: sum(
                 record["calculation_status"] == status for record in processed
             )
-            for status in CALCULATION_STATUSES
+            for status in sorted(CALCULATION_STATUSES)
         },
         "output_disposition_counts": {
             status: sum(record["disposition"] == status for record in processed)
-            for status in DISPOSITIONS
+            for status in sorted(DISPOSITIONS)
         },
     }
 

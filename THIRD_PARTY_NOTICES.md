@@ -10,6 +10,7 @@ The repository does not redistribute the external datasets listed below. Runtime
 |---|---:|---|---|
 | [RDKit](https://github.com/rdkit/rdkit/tree/Release_2025_09_2) | `2025.9.2` | [BSD-3-Clause](https://github.com/rdkit/rdkit/blob/Release_2025_09_2/license.txt) | Structure parsing, standardization, descriptors, fingerprints and graph operations |
 | [ChEMBL Structure Pipeline](https://github.com/chembl/ChEMBL_Structure_Pipeline) | `1.2.4` | [MIT](https://github.com/chembl/ChEMBL_Structure_Pipeline/blob/master/LICENSE) | ChEMBL structure checking, standardization and parent extraction |
+| [Gemmi](https://github.com/project-gemmi/gemmi) | `0.6.7` | [MPL-2.0](https://github.com/project-gemmi/gemmi/blob/v0.6.7/LICENSE.txt) | Independent CIF/mmCIF parsing for predicted structure validation |
 | [ORD Schema](https://github.com/open-reaction-database/ord-schema) | `0.8.3` | [Apache-2.0](https://github.com/open-reaction-database/ord-schema/blob/main/LICENSE) | Open Reaction Database protobuf schema and validation |
 
 The dependency licenses apply to those components. They are not replaced by this repository's Apache-2.0 license.
@@ -27,7 +28,21 @@ The dependency licenses apply to those components. They are not replaced by this
 
 - [Open Reaction Database API](https://open-reaction-database.org/).
 
+The host Agent may call the Agent Plan professional dataset service before
+`predict-complex-structures`. The Skill only consumes a saved evidence artifact;
+it does not implement the DataPro client, receive an Agent Plan key, or grant
+rights to returned metadata or documents.
+
 The repository does not grant rights to these services or their returned records. Users must review the current service and source-specific terms before storing or redistributing results. Online requests may disclose query names or structures to the service operator.
+
+## External Model Runtime
+
+`predict-complex-structures` can invoke the official
+[Protenix](https://github.com/bytedance/Protenix) CLI in a separately managed
+GPU runtime. Protenix code and model parameters are released by ByteDance under
+Apache-2.0. This repository does not bundle Protenix code, model weights, CUDA
+components, MSA/template databases, or generated predictions. Runtime
+dependencies and data retain their own licenses and terms.
 
 ## Referenced Data
 

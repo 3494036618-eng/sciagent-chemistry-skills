@@ -349,11 +349,13 @@ class StandardizeChemicalStructuresTests(unittest.TestCase):
                 "id,structure,source\naspirin,CC(=O)Oc1ccccc1C(=O)O,fixture\n",
                 encoding="utf-8",
             )
-            csv_records, _ = PROCESSOR.read_input_records(
+            csv_records, csv_provenance = PROCESSOR.read_input_records(
                 csv_path, "auto", "structure", "id", [], []
             )
             self.assertEqual(csv_records[0]["id"], "aspirin")
             self.assertEqual(csv_records[0]["original_structure"], "CC(=O)Oc1ccccc1C(=O)O")
+            self.assertEqual(csv_provenance[0]["source"], "records.csv")
+            self.assertFalse(Path(csv_provenance[0]["source"]).is_absolute())
 
             smi_path = root / "records.smi"
             smi_path.write_text("CCO ethanol\nCC caffeine-fragment\n", encoding="utf-8")
@@ -386,6 +388,34 @@ class StandardizeChemicalStructuresTests(unittest.TestCase):
             )
             self.assertEqual(len(mol_records), 1)
             self.assertEqual(mol_records[0]["original_structure"], molblock)
+
+    def test_file_location_does_not_change_result_fingerprint(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            paths = [root / "first" / "records.smi", root / "second" / "records.smi"]
+            documents = []
+            for path in paths:
+                path.parent.mkdir()
+                path.write_text("CCO ethanol\n", encoding="utf-8")
+                records, provenance = PROCESSOR.read_input_records(
+                    path, "auto", "structure", "id", [], []
+                )
+                documents.append(
+                    PROCESSOR.process_records(
+                        records,
+                        "chembl-pipeline",
+                        provenance=provenance,
+                        generated_at_utc="2026-08-06T00:00:00+00:00",
+                    )
+                )
+            self.assertEqual(
+                documents[0]["result_fingerprint"],
+                documents[1]["result_fingerprint"],
+            )
+            self.assertEqual(
+                documents[0]["provenance"],
+                [{"source": "records.smi", "input_format": "smiles"}],
+            )
 
     def test_cli_writes_json_and_csv_and_returns_two_for_rejected(self):
         with tempfile.TemporaryDirectory() as tmpdir:

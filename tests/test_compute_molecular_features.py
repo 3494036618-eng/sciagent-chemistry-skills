@@ -676,6 +676,8 @@ class ContractTamperAndInputTests(unittest.TestCase):
             self.assertEqual(json_records[0]["id"], "aspirin")
             self.assertEqual(json_records[0]["original_structure"], ASPIRIN)
             self.assertEqual(json_upstream["schema_version"], "direct-v1")
+            self.assertEqual(json_upstream["source"], "records.json")
+            self.assertFalse(Path(json_upstream["source"]).is_absolute())
 
             csv_path = root / "records.csv"
             csv_path.write_text(
@@ -692,6 +694,66 @@ class ContractTamperAndInputTests(unittest.TestCase):
             self.assertEqual(csv_records[0]["id"], "ethanol")
             self.assertEqual(csv_records[0]["standardized_structure"], ETHANOL)
             self.assertEqual(csv_upstream["input_format"], "csv")
+
+    def test_file_location_does_not_change_feature_result_fingerprint(self):
+        payload = {
+            "schema_version": "1.0.0",
+            "workflow": "chemical-structure-standardization-qc",
+            "result_fingerprint": "a" * 64,
+            "options": {"profile": "chembl-pipeline"},
+            "records": [
+                {
+                    "id": "aspirin",
+                    "original_structure": ASPIRIN,
+                    "standardized_structure": ASPIRIN,
+                    "parent_structure": ASPIRIN,
+                    "parse_status": "success",
+                    "standardization_status": "completed",
+                    "disposition": "ready_for_downstream",
+                    "human_review_required": [],
+                }
+            ],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            documents = []
+            for folder in ("first", "second"):
+                path = root / folder / "standardized.json"
+                path.parent.mkdir()
+                path.write_text(json.dumps(payload), encoding="utf-8")
+                records, upstream = PROCESSOR.load_input_records(path, "json")
+                documents.append(
+                    PROCESSOR.process_records(
+                        records,
+                        calculation_view="standardized",
+                        upstream=upstream,
+                        generated_at_utc=FIXED_TIME,
+                    )
+                )
+            self.assertEqual(
+                documents[0]["result_fingerprint"],
+                documents[1]["result_fingerprint"],
+            )
+            self.assertEqual(
+                documents[0]["upstream"]["source"],
+                "standardized.json",
+            )
+            self.assertEqual(
+                list(
+                    documents[0]["input_summary"][
+                        "calculation_status_counts"
+                    ]
+                ),
+                sorted(PROCESSOR.CALCULATION_STATUSES),
+            )
+            self.assertEqual(
+                list(
+                    documents[0]["input_summary"][
+                        "output_disposition_counts"
+                    ]
+                ),
+                sorted(PROCESSOR.DISPOSITIONS),
+            )
 
     def test_input_adapter_rejects_missing_structure_column_and_secrets(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -3,15 +3,15 @@
 [![CI](https://github.com/3494036618-eng/sciagent-chemistry-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/3494036618-eng/sciagent-chemistry-skills/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-一组面向科研 Agent 的可审计化学 Skill，覆盖小分子身份、结构、二维特征、分子库治理、反应整理、反应检索和已有合成路线评审。
+一组面向科研 Agent 的可审计学科 Skill，覆盖小分子身份、结构、二维特征、分子库治理、反应整理、反应检索、已有合成路线评审，以及蛋白质–配体复合物结构预测的输入治理和结果验证。
 
 > English summary: Auditable chemistry skills for scientific agents, with deterministic computation, provenance, controlled status propagation, and explicit scientific limits.
 
 ## 状态
 
-- 版本：`0.1.0-alpha.1`
+- 版本：`0.1.0-alpha.2`
 - 阶段：工程候选版
-- 公开测试：306 项
+- 公开测试：382 项（另含 29 个 subtests）
 - 化学专家验收：尚未完成
 - 真实用户验收：尚未完成
 - 生产可用声明：无
@@ -29,6 +29,7 @@
 | `curate-reactions` | 非破坏性整理 reaction SMILES、ORD 和反应表格 | 守恒与映射仅作诊断，不证明反应正确 |
 | `search-reactions` | 按 ID、组分、SMARTS 或整体反应相似度检索先例 | 先例不等于路线可行或条件推荐 |
 | `review-routes` | 审查已有路线拓扑、逐步证据、库存声明和证据缺口 | 不生成逆合成路线，不判断路线安全、最优或可实验 |
+| `predict-complex-structures` | 用科研证据、已审查实体和 Protenix 准备并验证复合物结构预测 | 需要独立 GPU Runtime；预测结构和置信度不等于实验结构、结合、活性或药效 |
 
 典型衔接：
 
@@ -42,6 +43,9 @@ curate reactions
 → search reaction precedents
 → review existing routes
 ```
+
+七个化学 Skill 的离线阿司匹林端到端验收入口：
+[examples/aspirin-seven-skill-e2e](examples/aspirin-seven-skill-e2e)。
 
 ## 设计原则
 
@@ -61,8 +65,16 @@ curate reactions
 - RDKit `2025.9.2`
 - ChEMBL Structure Pipeline `1.2.4`
 - ORD Schema `0.8.3`
+- Gemmi `0.6.7`
 
-建议创建隔离环境：
+建议使用锁文件创建可复现实验环境：
+
+```bash
+uv sync --frozen --all-groups
+uv run python -m pytest -q
+```
+
+也可使用 `requirements-dev.txt` 创建隔离环境：
 
 ```bash
 python3 -m venv .venv

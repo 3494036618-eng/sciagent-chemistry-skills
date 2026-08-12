@@ -806,6 +806,35 @@ class ContractAndCliTests(unittest.TestCase):
         self.assertEqual(document["results"][0]["license"], "CC-BY-SA-4.0")
         self.assertEqual(VALIDATOR.validate_output(document), [])
 
+    def test_local_corpus_source_license_and_provenance_are_propagated(self):
+        artifact = corpus_artifact()
+        artifact["records"][0]["source_locator"] = None
+        artifact["source_record"] = {
+            "identifier": "controlled-corpus",
+            "content_sha256": "a" * 64,
+            "license": "Apache-2.0",
+        }
+        artifact["result_fingerprint"] = CORE.curated_artifact_fingerprint(
+            artifact
+        )
+        value = request(
+            "lookup_reaction",
+            query={"reaction_id": "r-oxidation"},
+        )
+        value["corpus_artifact"] = artifact
+        document = process(value)
+        result = document["results"][0]
+        self.assertEqual(result["license"], "Apache-2.0")
+        self.assertEqual(
+            result["source"]["source_locator"]["identifier"],
+            "controlled-corpus",
+        )
+        self.assertEqual(
+            result["source"]["provenance"]["workflow"],
+            "curate-reactions",
+        )
+        self.assertEqual(VALIDATOR.validate_output(document), [])
+
     def test_local_ord_evidence_is_preserved_from_curated_record(self):
         artifact = corpus_artifact()
         record = artifact["records"][0]

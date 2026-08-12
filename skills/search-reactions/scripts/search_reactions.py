@@ -535,13 +535,37 @@ def load_local_candidates(
         artifact
     ):
         raise InputFailure("corpus_artifact result_fingerprint 缺失或不匹配。")
+    source_record = artifact.get("source_record")
+    source_record = source_record if isinstance(source_record, dict) else {}
     included, excluded, warnings = [], [], []
     seen_ids: set[str] = set()
     for index, record in enumerate(records):
         if not isinstance(record, dict):
             excluded.append({"index": index, "reason": "record_not_object"})
             continue
-        candidate, reason = normalize_candidate(record, "local_curated_corpus", toolkit)
+        candidate_record = dict(record)
+        if candidate_record.get("license") is None:
+            candidate_record["license"] = source_record.get("license")
+        if (
+            candidate_record.get("source") is None
+            and candidate_record.get("source_locator") is None
+            and source_record
+        ):
+            candidate_record["source"] = {
+                "source_locator": {
+                    "identifier": source_record.get("identifier"),
+                    "content_sha256": source_record.get("content_sha256"),
+                },
+                "provenance": {
+                    "workflow": artifact.get("workflow"),
+                    "result_fingerprint": fingerprint,
+                },
+            }
+        candidate, reason = normalize_candidate(
+            candidate_record,
+            "local_curated_corpus",
+            toolkit,
+        )
         if candidate is None:
             excluded.append({"index": index, "reason": reason})
             continue

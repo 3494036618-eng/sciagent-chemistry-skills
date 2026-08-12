@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 import sys
+import tomllib
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -20,6 +21,7 @@ SKILLS = (
     "curate-reactions",
     "search-reactions",
     "review-routes",
+    "predict-complex-structures",
 )
 
 ROOT_FILES = (
@@ -35,6 +37,7 @@ ROOT_FILES = (
     "THIRD_PARTY_NOTICES.md",
     "pyproject.toml",
     "requirements-dev.txt",
+    "uv.lock",
 )
 
 SKILL_FILES = (
@@ -66,12 +69,20 @@ SECRET_PATTERNS = (
     re.compile(r"github_pat_[A-Za-z0-9_]{20,}"),
     re.compile(r"AKIA[0-9A-Z]{16}"),
     re.compile(r"sk-[A-Za-z0-9_-]{20,}"),
+    re.compile(r"ark-[A-Za-z0-9-]{30,}"),
     re.compile(
         r"eyJ[A-Za-z0-9_-]{20,}\."
         r"[A-Za-z0-9_-]{20,}\."
         r"[A-Za-z0-9_-]{20,}"
     ),
 )
+
+
+def ignored_path(path: Path) -> bool:
+    relative = path.relative_to(ROOT)
+    return ".git" in relative.parts or any(
+        part in FORBIDDEN_PARTS for part in relative.parts
+    )
 
 
 def load_yaml(path: Path, errors: list[str]) -> object | None:
@@ -122,6 +133,13 @@ def pinned_requirements(path: Path, errors: list[str]) -> set[str]:
     return packages
 
 
+def public_version(pep440_version: str) -> str | None:
+    match = re.fullmatch(r"(\d+\.\d+\.\d+)a(\d+)", pep440_version)
+    if match is None:
+        return None
+    return f"{match.group(1)}-alpha.{match.group(2)}"
+
+
 def validate_structure(errors: list[str]) -> None:
     for relative in ROOT_FILES:
         if not (ROOT / relative).is_file():
@@ -151,6 +169,49 @@ def validate_metadata(errors: list[str]) -> None:
         ROOT / "requirements-dev.txt",
         errors,
     )
+    display_version: str | None = None
+    try:
+        pyproject = tomllib.loads(
+            (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        )
+        project = pyproject.get("project", {})
+        if project.get("name") != "sciagent-chemistry-skills":
+            errors.append("pyproject.toml project.name is incorrect")
+        project_version = str(project.get("version") or "")
+        display_version = public_version(project_version)
+        if display_version is None:
+            errors.append(
+                "pyproject.toml project.version must use X.Y.ZaN alpha format"
+            )
+        pyproject_dev = {
+            str(item).lower()
+            for item in pyproject.get("dependency-groups", {}).get("dev", [])
+        }
+        if pyproject_dev != development_dependencies:
+            errors.append(
+                "pyproject.toml dev dependencies must exactly match "
+                "requirements-dev.txt"
+            )
+        if project.get("requires-python") != ">=3.11,<3.13":
+            errors.append("pyproject.toml must constrain Python to >=3.11,<3.13")
+        lock = tomllib.loads((ROOT / "uv.lock").read_text(encoding="utf-8"))
+        locked_project = next(
+            (
+                package
+                for package in lock.get("package", [])
+                if package.get("name") == "sciagent-chemistry-skills"
+            ),
+            None,
+        )
+        if not isinstance(locked_project, dict) or locked_project.get(
+            "version"
+        ) != project_version:
+            errors.append("uv.lock project version must match pyproject.toml")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        if display_version and f"- 版本：`{display_version}`" not in readme:
+            errors.append("README.md version must match pyproject.toml")
+    except (OSError, UnicodeError, tomllib.TOMLDecodeError) as exc:
+        errors.append(f"project metadata: invalid TOML or unreadable file: {exc}")
     for skill in SKILLS:
         skill_root = SKILLS_ROOT / skill
         metadata = frontmatter(skill_root / "SKILL.md", errors)
@@ -182,17 +243,19 @@ def validate_metadata(errors: list[str]) -> None:
             errors.append("CITATION.cff: missing required CFF fields")
         if citation.get("license") != "Apache-2.0":
             errors.append("CITATION.cff: license must be Apache-2.0")
+        if display_version and citation.get("version") != display_version:
+            errors.append("CITATION.cff version must match pyproject.toml")
 
     for pattern in ("*.yaml", "*.yml"):
         for path in ROOT.rglob(pattern):
-            if ".git" not in path.relative_to(ROOT).parts:
+            if not ignored_path(path):
                 load_yaml(path, errors)
 
 
 def validate_local_links(errors: list[str]) -> None:
     link_pattern = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
     for path in ROOT.rglob("*.md"):
-        if ".git" in path.relative_to(ROOT).parts:
+        if ignored_path(path):
             continue
         text = path.read_text(encoding="utf-8")
         for raw_target in link_pattern.findall(text):
@@ -220,7 +283,7 @@ def validate_local_links(errors: list[str]) -> None:
 def validate_public_boundary(errors: list[str]) -> None:
     for path in ROOT.rglob("*"):
         relative = path.relative_to(ROOT)
-        if any(part in FORBIDDEN_PARTS for part in relative.parts):
+        if ignored_path(path):
             continue
         if path.name in FORBIDDEN_NAMES:
             errors.append(f"forbidden private file: {relative}")
@@ -247,7 +310,12 @@ def validate_public_boundary(errors: list[str]) -> None:
             continue
         user_path_marker = "/" + "Users" + "/"
         internal_path_marker = "byte" + "dance" + "/"
-        if user_path_marker in text or internal_path_marker in text:
+        public_github_prefix = "https://github.com/" + internal_path_marker
+        boundary_text = text.replace(public_github_prefix, "")
+        if (
+            user_path_marker in boundary_text
+            or internal_path_marker in boundary_text
+        ):
             errors.append(f"machine-specific or internal path in {relative}")
         for pattern in SECRET_PATTERNS:
             if pattern.search(text):
